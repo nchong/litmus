@@ -1,13 +1,19 @@
 A bunch of litmus tests for examining corner cases of GPU architectures.
 
 GETTING STARTED
-First build the clwrapper library:
-You need your CUDA library and OPENCL library path:
+* Environment variables
+You need CUDA library and OPENCL library paths:
 $ export CUDADIR=/path/to/cuda
 $ export CLDIR=/path/to/cuda
-$ make
-$ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+On Linux:
+  $ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+Or, on mac:
+  $ export DYLD_LIBRARY_PATH=`pwd`/lib:$DYLD_LIBRARY_PATH
 
+* Build the clwrapper library
+$ make
+
+* Build the tests
 Each test inside tests/ has a cuda/ or cl/ version. To make all tests:
 $ cd tests
-$ make
+$ make all
