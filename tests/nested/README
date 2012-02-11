@@ -1,0 +1,1 @@
+This kernel uses nested loops to show barrier divergence.

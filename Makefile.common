@@ -1,0 +1,36 @@
+# COMPILE OPTIONS
+ifeq ($(CXX), icc)
+CXX = icc
+override CXXFLAGS += -O2
+override CXXFLAGS += -Wall -Wcheck
+else
+CXX = g++
+override CXXFLAGS += -O2
+override CXXFLAGS += -Wall -Wextra -Werror -pedantic -Wno-variadic-macros
+endif
+LOG_LEVEL = LOG_WARN
+override CXXFLAGS += -DLOG_LEVEL=$(LOG_LEVEL)
+override CXXFLAGS += -fPIC
+
+#CUDA
+NVCC = nvcc
+override NVCCFLAGS += -Xcompiler "-Wall -fPIC"
+
+# OPENCL LIBRARIES BASED ON OS
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+OPENCL_LIB = -framework OpenCL
+OPENCL_INC =
+SHARED = -dynamiclib
+endif
+
+ifeq ($(UNAME), Linux)
+.PHONY: .check-env
+.check-env:
+	@if [ ! -d "$(CLDIR)" ]; then \
+		echo "ERROR: set CLDIR variable."; exit 1; \
+	fi
+OPENCL_LIB = -L$(CLDIR)/lib -lOpenCL
+OPENCL_INC = -I $(CLDIR)/include
+SHARED = -shared
+endif

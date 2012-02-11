@@ -1,0 +1,10 @@
+A bunch of litmus tests for examining corner cases of GPU architectures.
+
+GETTING STARTED
+First build the clwrapper library:
+$ make
+$ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+
+Each test inside tests/ has a cuda/ or cl/ version. To make all tests:
+$ cd tests
+$ make
