@@ -2,6 +2,9 @@ A bunch of litmus tests for examining corner cases of GPU architectures.
 
 GETTING STARTED
 First build the clwrapper library:
+You need your CUDA library and OPENCL library path:
+$ export CUDADIR=/path/to/cuda
+$ export CLDIR=/path/to/cuda
 $ make
 $ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
 

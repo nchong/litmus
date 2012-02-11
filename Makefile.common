@@ -13,8 +13,8 @@ override CXXFLAGS += -DLOG_LEVEL=$(LOG_LEVEL)
 override CXXFLAGS += -fPIC
 
 #CUDA
-NVCC = nvcc
-override NVCCFLAGS += -Xcompiler "-Wall -fPIC"
+NVCC = $(CUDADIR)/bin/nvcc
+override NVCCFLAGS += -Xcompiler "-Wall" -Xptxas -v
 
 # OPENCL LIBRARIES BASED ON OS
 UNAME := $(shell uname)
@@ -25,12 +25,22 @@ SHARED = -dynamiclib
 endif
 
 ifeq ($(UNAME), Linux)
-.PHONY: .check-env
-.check-env:
+SHARED = -shared
+OPENCL_LIB = -L$(CLDIR)/lib -lOpenCL
+OPENCL_INC = -I $(CLDIR)/include
+.PHONY: .check-opencl-env
+.check-opencl-env:
 	@if [ ! -d "$(CLDIR)" ]; then \
 		echo "ERROR: set CLDIR variable."; exit 1; \
 	fi
-OPENCL_LIB = -L$(CLDIR)/lib -lOpenCL
-OPENCL_INC = -I $(CLDIR)/include
-SHARED = -shared
+all: .check-opencl-env
+
+.PHONY: .check-cuda-env
+.check-cuda-env:
+	@if [ ! -d "$(CUDADIR)" ]; then \
+		echo "ERROR: set CUDADIR variable."; exit 1; \
+	fi
+CUDA_LIB = -L$(CUDADIR)/lib64 -lcuda -lcudart
+CUDA_INC = -I $(CUDADIR)/include
+all: .check-cuda-env
 endif
