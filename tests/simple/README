@@ -1,0 +1,2 @@
+This kernel uses an array to dynamically choose barriers.
+There is barrier divergence if the array is not all 0s or 1s.
