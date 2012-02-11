@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
   cl_uint dim = 1;
   size_t global_work_size = GROUPSIZE;
   size_t local_work_size  = GROUPSIZE;
-  clw.run_kernel_with_timing(k, dim, &global_work_size, &local_work_size);
+  clw.run_kernel(k, dim, &global_work_size, &local_work_size);
 
   // memcpy back trace
   clw.memcpy_from_dev(d_trace, sizeof(int)*ntrace, trace);
