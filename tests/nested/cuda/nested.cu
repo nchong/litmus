@@ -23,7 +23,7 @@
 } while(0);
 
 //set x and y through xyvals
-__global__ void k2(int *xyvals, int *trace) {
+__global__ void k2(int *xyvals, int *trace, int*final) {
   __shared__ int A[2][4];
   int buf, x, y, i, j;
   int lid = threadIdx.x;
@@ -49,6 +49,14 @@ __global__ void k2(int *xyvals, int *trace) {
       j++;
     }
     i++;
+  }
+
+  __syncthreads();
+  if (lid == 0) {
+    final[0] = A[0][0]; final[1] = A[0][1];
+    final[2] = A[0][2]; final[3] = A[0][3];
+    final[4] = A[1][0]; final[5] = A[1][1];
+    final[6] = A[1][2]; final[7] = A[1][3];
   }
 }
 
@@ -87,10 +95,20 @@ int main(int argc, char **argv) {
   cudaMalloc((void **)&d_trace, d_trace_size);
   cudaMemcpy(d_trace, trace, d_trace_size, cudaMemcpyHostToDevice);
 
+  // also record the final state of A
+  int final[8];
+  for (int i=0; i<8; i++) {
+    final[i] = 99;
+  }
+  int *d_final;
+  size_t d_final_size = sizeof(int)*8;
+  cudaMalloc((void **)&d_final, d_final_size);
+  cudaMemcpy(d_final, final, d_final_size, cudaMemcpyHostToDevice);
+
   // run kernel
   printf("Set x and y through xyvals[%d,%d]...", xyvals[0], xyvals[1]);
   ASSERT_NO_CUDA_ERROR();
-  k2<<</*gridDim=*/1, GROUPSIZE>>>(d_xyvals, d_trace);
+  k2<<</*gridDim=*/1, GROUPSIZE>>>(d_xyvals, d_trace, d_final);
   ASSERT_NO_CUDA_ERROR();
   printf("[done]\n");
 
@@ -111,8 +129,16 @@ int main(int argc, char **argv) {
     printf("---\n");
   }
 
+  // print out final state
+  cudaMemcpy(final, d_final, d_final_size, cudaMemcpyDeviceToHost);
+  printf("final state\n");
+  printf("    A = {{%d,%d,%d,%d}, {%d,%d,%d,%d}}\n",
+    final[0],final[1],final[2],final[3],
+    final[4],final[5],final[6],final[7]);
+
   cudaFree(d_xyvals);
   cudaFree(d_trace);
+  cudaFree(d_final);
   delete[] trace;
   return 0;
 
