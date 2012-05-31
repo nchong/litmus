@@ -10,7 +10,7 @@
   loop++;                                                     \
 } while(0);
 
-__kernel void k(__global int *xyvals, __global int *trace) {
+__kernel void k(__global int *xyvals, __global int *trace, __global int *final) {
   __local int A[2][4];
   int buf, x, y, i, j;
   int lid = get_local_id(0);
@@ -36,5 +36,13 @@ __kernel void k(__global int *xyvals, __global int *trace) {
       j++;
     }
     i++;
+  }
+
+  barrier(CLK_LOCAL_MEM_FENCE);
+  if (lid == 0) {
+    final[0] = A[0][0]; final[1] = A[0][1];
+    final[2] = A[0][2]; final[3] = A[0][3];
+    final[4] = A[1][0]; final[5] = A[1][1];
+    final[6] = A[1][2]; final[7] = A[1][3];
   }
 }

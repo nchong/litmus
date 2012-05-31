@@ -33,6 +33,12 @@ int main(int argc, char **argv) {
     trace[i] = 99;
   }
 
+  // also record the final state of A
+  int final[8];
+  for (int i=0; i<8; i++) {
+    final[i] = 99;
+  }
+
   // creates a context and command queue
   CLWrapper clw(PLATFORM, DEVICE, /*profiling=*/false);
 
@@ -49,13 +55,15 @@ int main(int argc, char **argv) {
   // create some memory objects on the device
   cl_mem d_xyvals = clw.dev_malloc(sizeof(int)*2,      CL_MEM_READ_ONLY);
   cl_mem d_trace  = clw.dev_malloc(sizeof(int)*ntrace, CL_MEM_READ_WRITE);
+  cl_mem d_final  = clw.dev_malloc(sizeof(int)*8,      CL_MEM_READ_WRITE);
 
   // memcpy into these objects
   clw.memcpy_to_dev(d_xyvals, sizeof(int)*2,      xyvals);
   clw.memcpy_to_dev(d_trace,  sizeof(int)*ntrace, trace);
+  clw.memcpy_to_dev(d_final,  sizeof(int)*8,      final);
 
   // set kernel arguments
-  clw.kernel_arg(k, d_xyvals, d_trace);
+  clw.kernel_arg(k, d_xyvals, d_trace, d_final);
 
   // run the kernel
   cl_uint dim = 1;
@@ -81,6 +89,13 @@ int main(int argc, char **argv) {
     }
     printf("---\n");
   }
+
+  // print out final state
+  clw.memcpy_from_dev(d_final, sizeof(int)*8, final);
+  printf("final state\n");
+  printf("    A = {{%d,%d,%d,%d}, {%d,%d,%d,%d}}\n",
+    final[0],final[1],final[2],final[3],
+    final[4],final[5],final[6],final[7]);
 
   // clean up
   delete[] trace;
